@@ -11,6 +11,10 @@ To build exe
 go build
 
 
+git add --all
+git commit -m "added dockerfile"
+git push
+
 */
 
 import (

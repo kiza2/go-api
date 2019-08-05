@@ -1,18 +1,30 @@
+
 # to make image = docker build -t go-api-image .
 # to view image after success = docker images
-# to run app = docker run -it -d go-api-image
-# to run app = docker run -publish 3000:3000 -name go-api-image
+# to view container = docker ps -a
+# to run app = docker run --rm -p 3000:3000 go-api-image
 # to see in browser = http://localhost:3000
 
+# to delete images
+# docker rmi -f $(docker images -a -q)
+# to delete containers
+# docker rm -vf $(docker ps -a -q)
 
-FROM golang:1.12
+
+#go env -> GOOS = "windows"
+# in cmd admin
+# set GOOS=linux
+# set GOOS=windows
+
+FROM golang:1.12.7-alpine3.10
+RUN apk add git
 RUN mkdir /app 
-ADD . /app/
+ADD . /app
 WORKDIR /app 
 RUN go get github.com/go-chi/chi
 RUN go build -o main .
 EXPOSE 3000
-CMD ["./main"]
+CMD ["/app/main"]
 
 # FROM golang:1.12 
 
