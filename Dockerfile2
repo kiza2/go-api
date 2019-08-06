@@ -1,18 +1,21 @@
 
-# to make image = docker build -t go-api-image .
+# XXX to make image = docker build -t go-api-image .\
+# to make image = docker build -t go-api-image-volume -f Dockerfile.volume .
 # to view image after success = docker images
 # to view container = docker ps -a
 # to run app = docker run --rm -d -p 3000:3000 go-api-image
-#  docker run --rm p 3000:3000 go-api-image (waiting..., no return to prompt)
+# XXX docker run --rm p 3000:3000 go-api-image (waiting..., no return to prompt)
+# docker run -d -p 8080:8080 -v ~/logs/go-api-image:/app/logs go-api-image-volume
 # to see in browser = http://localhost:3000
+
+# mkdir -p ~/logs/go-docker
+# tail -200f ~/logs/go-docker/app.log
+
 
 # to delete images
 # docker rmi -f $(docker images -a -q)
 # to delete containers
 # docker rm -vf $(docker ps -a -q)
-
-# DELETE ALL
-# docker system prune -a
 
 
 #go env -> GOOS = "windows"
@@ -26,21 +29,18 @@
 # Multistage build to make a temporary container to help the app build
 # then copy assets to another container with least amt of components to run app
 FROM golang:alpine as builder
-#RUN apk add git
-# alpine doesn't have some apps, so adding git, bash, and openssh to the image
-#RUN apk update && apk upgrade && apk add --no-cache bash git openssh
-RUN apk update && apk upgrade && apk add --no-cache git
-LABEL maintainer="Alex Yu"
-
+RUN apk add git
 RUN mkdir /build 
 ADD . /build
 WORKDIR /build 
+
+# attach a volume to the container
+ARG LOG_DIR=/app/logs
+RUN mkdir -p ${LOG_DIR}
+ENV LOG_FILE_LOCATION=${LOG_DIR}/app.log 
+
 COPY go.mod go.sum ./
-
-# download all dependencies
 RUN  go mod download
-
-# copy all files here to current working dir (/build)
 COPY . .
 
 #RUN CGO_ENABLED=0 GOOS=linux go get -a -installsuffix cgo -ldflags '-extldflags "-static"'  github.com/go-chi/chi
@@ -60,4 +60,8 @@ FROM scratch
 COPY --from=builder /build/main /app/
 WORKDIR /app
 EXPOSE 3000
+
+# declare volume to mount
+VOLUME [${LOG_DIR}]
+
 CMD ["./main"]

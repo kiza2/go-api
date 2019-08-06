@@ -18,6 +18,7 @@ git push
 */
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -28,5 +29,6 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
 	})
+	fmt.Println("Starting server on port 3000!")
 	http.ListenAndServe(":3000", r)
 }

@@ -1,8 +1,12 @@
-version: '3'
+# docker-compose up --build (do once)
+# docker-compose up (restart)
+# docker system prune -a (to delete all images, containers, etc)
+version: "3"
 services:
-  web:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports: 
       - "3000:3000"
-  database:
-    image: "mysql:alpine"
+    restart: unless-stopped
